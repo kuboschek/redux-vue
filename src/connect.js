@@ -1,47 +1,57 @@
-import normalizeProps from './normalizeProps';
+'use strict';
 
-function noop() {
-}
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+exports.default = connect;
+
+var _normalizeProps = require('./normalizeProps');
+
+var _normalizeProps2 = _interopRequireDefault(_normalizeProps);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function noop() {}
 
 function getStore(component) {
   return component.$store;
 }
 
 function getAttrs(component) {
-  return component._self.$options._parentVnode.data.attrs;
+  return component.$attrs;
 }
 
 function getStates(component, mapStateToProps) {
-  const store = getStore(component);
-  const attrs = getAttrs(component);
+  var store = getStore(component);
+  var attrs = getAttrs(component);
 
   return mapStateToProps(store.getState(), attrs) || {};
 }
 
 function getActions(component, mapActionsToProps) {
-  const store = getStore(component);
+  var store = getStore(component);
 
   return mapActionsToProps(store.dispatch, getAttrs.bind(null, component)) || {};
 }
 
 function getProps(component) {
-  let props = {};
-  const attrs = getAttrs(component);
-  const stateNames = component.vuaReduxStateNames;
-  const actionNames = component.vuaReduxActionNames;
+  var props = {};
+  var attrs = getAttrs(component);
+  var stateNames = component.vuaReduxStateNames;
+  var actionNames = component.vuaReduxActionNames;
 
-  for (let ii = 0; ii < stateNames.length; ii++) {
+  for (var ii = 0; ii < stateNames.length; ii++) {
     props[stateNames[ii]] = component[stateNames[ii]];
   }
 
-  for (let ii = 0; ii < actionNames.length; ii++) {
-    props[actionNames[ii]] = component[actionNames[ii]];
+  for (var _ii = 0; _ii < actionNames.length; _ii++) {
+    props[actionNames[_ii]] = component[actionNames[_ii]];
   }
 
-  return {
-    ...props,
-    ...attrs
-  };
+  return _extends({}, props, attrs);
 }
 
 /**
@@ -55,63 +65,62 @@ function getProps(component) {
  * @param mapActionsToProps
  * @returns Object
  */
-export default function connect(mapStateToProps, mapActionsToProps) {
+function connect(mapStateToProps, mapActionsToProps) {
   mapStateToProps = mapStateToProps || noop;
   mapActionsToProps = mapActionsToProps || noop;
 
-  return (children) => {
+  return function (children) {
 
     /** @namespace children.collect */
     if (children.collect) {
-      children.props = {
-        ...normalizeProps(children.props || {}),
-        ...normalizeProps(children.collect || {})
-      };
+      children.props = _extends({}, (0, _normalizeProps2.default)(children.props || {}), (0, _normalizeProps2.default)(children.collect || {}));
 
-      const msg = `vua-redux: collect is deprecated, use props ` +
-        `in ${children.name || 'anonymous'} component`;
+      var msg = 'vue-redux: collect is deprecated, use props ' + ('in ' + (children.name || 'anonymous') + ' component');
 
       console.warn(msg);
     }
 
     return {
-      name: `ConnectVuaRedux-${children.name || 'children'}`,
+      name: 'ConnectVueRedux-' + (children.name || 'children'),
 
-      render(h) {
-        const props = getProps(this);
+      components: children.components,
+      beforeMount: children.beforeMount,
+      mounted: children.mounted,
+      computed: children.computed,
+      methods: children.methods,
+      
+      render: function render(h) {
+        var props = getProps(this);
 
-        return h(children, { props });
+        return h(children, { props: props });
       },
+      data: function data() {
+        var state = getStates(this, mapStateToProps);
+        var actions = getActions(this, mapActionsToProps);
+        var stateNames = Object.keys(state);
+        var actionNames = Object.keys(actions);
 
-      data() {
-        const state = getStates(this, mapStateToProps);
-        const actions = getActions(this, mapActionsToProps);
-        const stateNames = Object.keys(state);
-        const actionNames = Object.keys(actions);
-
-        return {
-          ...state,
-          ...actions,
+        return _extends({}, state, actions, {
           vuaReduxStateNames: stateNames,
           vuaReduxActionNames: actionNames
-        };
+        });
       },
+      created: function created() {
+        var _this = this;
 
-      created() {
-        const store = getStore(this);
+        var store = getStore(this);
 
-        this.vuaReduxUnsubscribe = store.subscribe(() => {
-          const state = getStates(this, mapStateToProps);
-          const stateNames = Object.keys(state);
-          this.vuaReduxStateNames = stateNames;
+        this.vuaReduxUnsubscribe = store.subscribe(function () {
+          var state = getStates(_this, mapStateToProps);
+          var stateNames = Object.keys(state);
+          _this.vuaReduxStateNames = stateNames;
 
-          for (let ii = 0; ii < stateNames.length; ii++) {
-            this[stateNames[ii]] = state[stateNames[ii]];
+          for (var ii = 0; ii < stateNames.length; ii++) {
+            _this[stateNames[ii]] = state[stateNames[ii]];
           }
         });
       },
-
-      beforeDestroy() {
+      beforeDestroy: function beforeDestroy() {
         this.vuaReduxUnsubscribe();
       }
     };
