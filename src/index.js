@@ -1,2 +1,4 @@
-export connect from './connect';
-export reduxStorePlugin from './reduxStorePlugin';
+import connect from './connect'
+import reduxStorePlugin from './reduxStorePlugin'
+
+export {connect, reduxStorePlugin}

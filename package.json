@@ -10,7 +10,7 @@
   "bugs": "https://github.com/nadimtuhin/redux-vue/issues",
   "homepage": "http://nadimtuhin.com",
   "license": "MIT",
-  "main": "lib/index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "mocha \"./src/**/*.spec.js\" --compilers js:babel-core/register",
     "test:watch": "npm test -- --watch",
