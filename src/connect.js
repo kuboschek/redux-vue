@@ -82,6 +82,7 @@ export default function connect(mapStateToProps, mapActionsToProps) {
       mounted: children.mounted,
       computed: children.computed,
       methods: children.methods,
+      watch: children.watch,
       
       render: function render(h) {
         var props = getProps(this);
