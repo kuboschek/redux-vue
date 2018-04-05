@@ -80,6 +80,7 @@ export default function connect(mapStateToProps, mapActionsToProps) {
       components: children.components,
       beforeMount: children.beforeMount,
       beforeUpdate: children.beforeUpdate,
+      beforeDestroy: children.beforeDestroy,
       mounted: children.mounted,
       computed: children.computed,
       methods: children.methods,
